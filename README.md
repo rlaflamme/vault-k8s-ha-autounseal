@@ -1,7 +1,7 @@
-=== Vault transit
+*** Vault transit
 
 
-==== cleanup
+**** cleanup
 vault_transit_PODS="vault-transit-0 vault-transit-1 vault-transit-2"
 for POD in $vault_transit_PODS; do
   kubectl exec $POD -- rm -rf /vault/data/;
@@ -14,7 +14,7 @@ done
 
 
 
-==== init
+**** init
 
 kubectl exec vault-transit-0 -- vault operator init \
     -key-shares=4 \
@@ -24,7 +24,7 @@ kubectl exec vault-transit-0 -- vault operator init \
 kubectl exec vault-transit-0 -- vault status
 
 
-==== (a) after init: unseal vault-transit-0
+**** (a) after init: unseal vault-transit-0
 
 PODS="vault-transit-0"
 for POD in $PODS; do	
@@ -34,7 +34,7 @@ for POD in $PODS; do
 done
 
 
-==== (a) after init: unseal vault-transit-1,vault-transit-2
+**** (a) after init: unseal vault-transit-1,vault-transit-2
 
 PODS="vault-transit-1 vault-transit-2"
 for POD in $PODS; do	
@@ -44,7 +44,7 @@ for POD in $PODS; do
   done
 done
 
-==== (b) after vault transit PODS restarted: unseal all vault-transits
+**** (b) after vault transit PODS restarted: unseal all vault-transits
 
 PODS="vault-transit-0 vault-transit-1 vault-transit-2"
 for POD in $PODS; do	
@@ -55,7 +55,7 @@ for POD in $PODS; do
 done
 
 
-==== vault transit status
+**** vault transit status
 
 PODS="vault-transit-0 vault-transit-1 vault-transit-2"
 for POD in $PODS; do	
@@ -65,7 +65,7 @@ done
 
 
 
-==== raft: list peers
+**** raft: list peers
 
 PODS="vault-transit-0 vault-transit-1 vault-transit-2"
 for POD in $PODS; do	
@@ -73,18 +73,18 @@ for POD in $PODS; do
 done
 
 
-==== setup enable transit and setup autounseal keys
+**** setup enable transit and setup autounseal keys
 
 kubectl exec vault-transit-0 -- sh -c "VAULT_TOKEN=$(cat vault-transit-keys.json | jq -r .root_token) vault secrets enable transit"
 kubectl exec vault-transit-0 -- sh -c "VAULT_TOKEN=$(cat vault-transit-keys.json | jq -r .root_token) vault write -f transit/keys/autounseal"
 
-==== setup autounseal policy file
+**** setup autounseal policy file
 
 kubectl cp autounseal-policy.hcl vault-transit-0:/tmp/.
 kubectl exec vault-transit-0 -- sh -c "VAULT_TOKEN=$(cat vault-transit-keys.json | jq -r .root_token) vault policy write autounseal /tmp/autounseal-policy.hcl"
 
 
-==== create transit token to be set in a secret
+**** create transit token to be set in a secret
 
 kubectl exec vault-transit-0 -- sh -c "VAULT_TOKEN=$(cat vault-transit-keys.json | jq -r .root_token) vault token create -orphan -policy=autounseal -period=24h -format=json" > vault-transit-token.json
 kubectl delete secret transit-vault-token 
@@ -92,10 +92,10 @@ kubectl create secret generic transit-vault-token --from-literal=token=$(jq -r .
 
 
 
-=== vault
+*** vault
 
 
-==== cleanup
+**** cleanup
 
 PODS="vault-0 vault-1 vault-2"
 for POD in $PODS; do
@@ -107,20 +107,20 @@ for i in {0..2}; do
 done
 
 
-==== init
+**** init
 
 kubectl exec vault-0 -- vault operator init -format=json > vault-recovery-keys.json
 kubectl exec vault-0 -- vault status
 
 
-==== join vault-1, vault-2
+**** join vault-1, vault-2
 
 PODS="vault-1 vault-2"
 for POD in $PODS; do
   kubectl exec -ti $POD -- vault operator raft join http://vault-0.vault-internal:8200
 done
 
-==== vault transit status
+**** vault transit status
 
 PODS="vault-0 vault-1 vault-2"
 for POD in $PODS; do	
@@ -128,7 +128,7 @@ for POD in $PODS; do
 done
 
 
-==== raft: list peers
+**** raft: list peers
 
 PODS="vault-0 vault-1 vault-2"
 for POD in $PODS; do
