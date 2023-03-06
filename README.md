@@ -2,6 +2,7 @@
 
 #### Helm install
 helm install vault-transit hashicorp/vault -f vault-transit-helm-values.yaml
+
 helm install vault hashicorp/vault -f vault-auto-unseal-helm-values.yaml
 
 
