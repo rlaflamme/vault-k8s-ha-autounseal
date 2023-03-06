@@ -1,5 +1,10 @@
 ### Vault transit
 
+#### Helm install
+helm install vault-transit hashicorp/vault -f vault-transit-helm-values.yaml
+helm install vault hashicorp/vault -f vault-auto-unseal-helm-values.yaml
+
+
 
 #### cleanup
 vault_transit_PODS="vault-transit-0 vault-transit-1 vault-transit-2"
