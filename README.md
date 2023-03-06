@@ -31,6 +31,7 @@ kubectl exec vault-transit-0 -- vault operator init \
     -format=json > vault-transit-keys.json
 
 kubectl exec vault-transit-0 -- vault status
+kubectl delete secret vault-transit-keys
 kubectl create secret generic vault-transit-keys --from-file=vault-transit-keys.json
 ```
 
@@ -131,6 +132,7 @@ done
 ```
 kubectl exec vault-0 -- vault operator init -format=json > vault-recovery-keys.json
 kubectl exec vault-0 -- vault status
+kubectl delete secret vault-recovery-keys
 kubectl create secret generic vault-recovery-keys --from-file=vault-recovery-keys.json
 ```
 
