@@ -1,0 +1,46 @@
+global:
+  openshift: true
+
+injector:
+  enabled: false
+
+server:
+  affinity: ""
+  ha:
+    enabled: true
+    replicas: 3
+    raft: 
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+
+        seal "transit" {
+          address = "http://vault-transit.vault:8200"
+          disable_renewal = "false"
+          key_name = "autounseal"
+          mount_path = "transit/"
+          tls_skip_verify = "true"
+        }
+
+        storage "raft" {
+          path = "/vault/data"
+        }
+
+        service_registration "kubernetes" {}
+  extraSecretEnvironmentVars:
+  - envName: VAULT_TOKEN
+    secretName: transit-vault-token
+    secretKey: token
+  route:
+    enabled: true
+    host: vault.apps.lab.okd.local
+    tls:
+      termination: edge
+  

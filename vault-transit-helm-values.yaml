@@ -1,0 +1,8 @@
+server:
+  affinity: ""
+  ha:
+    enabled: true
+    replicas: 3
+    raft: 
+      enabled: true
+      setNodeId: true
