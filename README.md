@@ -162,6 +162,11 @@ done
 
 ### After deployment:
 
+#### cleanup workspace / remove sensible data files
+```
+rm -f vault-transit-token.json vault-transit-keys.json vault-recovery-keys.json autounseal-policy.hcl
+```
+
 #### export vault-transit-keys.json from secret
 ```
 kubectl get secret vault-transit-keys -o yaml  -o jsonpath='{.data.vault-transit-keys\.json}' | base64 -d > vault-transit-keys.json
