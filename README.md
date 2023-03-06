@@ -1,4 +1,7 @@
 ### Vault transit
+### Référence
+https://dev.to/luafanti/vault-auto-unseal-using-transit-secret-engine-on-kubernetes-13k8
+
 
 #### Helm install
 helm install vault-transit hashicorp/vault -f vault-transit-helm-values.yaml
