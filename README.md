@@ -12,12 +12,12 @@ helm install vault hashicorp/vault -f vault-auto-unseal-helm-values.yaml
 
 #### cleanup
 ```
-vault_transit_PODS="vault-transit-0 vault-transit-1 vault-transit-2"
+PODS="vault-transit-0 vault-transit-1 vault-transit-2"
 for POD in $vault_transit_PODS; do
   kubectl exec $POD -- rm -rf /vault/data/;
 done
 
-vault_transit_PODS="vault-transit-0 vault-transit-1 vault-transit-2"
+PODS="vault-transit-0 vault-transit-1 vault-transit-2"
 for POD in $vault_transit_PODS; do
   kubectl delete pod $POD
 done
