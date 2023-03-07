@@ -12,12 +12,12 @@ helm install vault hashicorp/vault -f vault-auto-unseal-helm-values.yaml
 
 #### cleanup
 ```
-vault_transit_PODS="vault-transit-0 vault-transit-1 vault-transit-2"
+PODS="vault-transit-0 vault-transit-1 vault-transit-2"
 for POD in $vault_transit_PODS; do
   kubectl exec $POD -- rm -rf /vault/data/;
 done
 
-vault_transit_PODS="vault-transit-0 vault-transit-1 vault-transit-2"
+PODS="vault-transit-0 vault-transit-1 vault-transit-2"
 for POD in $vault_transit_PODS; do
   kubectl delete pod $POD
 done
@@ -50,6 +50,7 @@ done
 PODS="vault-transit-1 vault-transit-2"
 for POD in $PODS; do	
   kubectl exec $POD -- vault operator raft join http://vault-transit-0.vault-transit-internal:8200;
+  sleep 3
   for i in {0..1}; do	
     kubectl exec $POD -- vault operator unseal $(cat vault-transit-keys.json | jq -r .unseal_keys_b64[$i]);
   done
@@ -59,7 +60,6 @@ done
 ```
 PODS="vault-transit-0 vault-transit-1 vault-transit-2"
 for POD in $PODS; do	
-  kubectl exec $POD -- vault operator raft join http://vault-transit-0.vault-transit-internal:8200;
   for i in {0..1}; do	
     kubectl exec $POD -- vault operator unseal $(cat vault-transit-keys.json | jq -r .unseal_keys_b64[$i]);
   done
@@ -122,11 +122,12 @@ PODS="vault-0 vault-1 vault-2"
 for POD in $PODS; do
   kubectl exec $POD -- rm -rf /vault/data/;
 done
-```
-for i in {0..2}; do 
+
+PODS="vault-0 vault-1 vault-2"
+for POD in $PODS; do
   kubectl delete pod vault-$i
 done
-
+```
 
 #### init
 ```
@@ -158,4 +159,22 @@ for POD in $PODS; do
   kubectl exec $POD -- sh -c "VAULT_TOKEN=$(cat vault-recovery-keys.json | jq -r .root_token) vault operator raft list-peers"
 done
 ```
+
+### After deployment:
+
+#### cleanup workspace / remove sensible data files
+```
+rm -f vault-transit-token.json vault-transit-keys.json vault-recovery-keys.json autounseal-policy.hcl
+```
+
+#### export vault-transit-keys.json from secret
+```
+kubectl get secret vault-transit-keys -o yaml  -o jsonpath='{.data.vault-transit-keys\.json}' | base64 -d > vault-transit-keys.json
+```
+
+#### export vault-recovery-keys.json from secret
+```
+kubectl get secret vault-recovery-keys -o yaml  -o jsonpath='{.data.vault-recovery-keys\.json}' | base64 -d > vault-recovery-keys.json
+```
+
 
